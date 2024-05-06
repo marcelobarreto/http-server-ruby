@@ -53,8 +53,8 @@ class HTTPServer
       msg = req.headers["User-Agent"]
       [HTTPStatus::OK, {}, msg]
     end
-    @router.set_fallback do |_req|
-      [HTTPStatus::NotFound, {}, "Not found     "]
+    @router.set_fallback do
+      [HTTPStatus::NotFound, {}, "Not found anything at"]
     end
   end
 end

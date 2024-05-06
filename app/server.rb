@@ -27,6 +27,8 @@ class HTTPServer
     status, _, response = @router.respond!(request)
     write!("HTTP/1.1 #{status}")
     write!("")
+    write!("Content-Type: text/plain")
+    write!("Content-Length: #{msg.size}\r\n")
     write!(response)
 
     socket.close

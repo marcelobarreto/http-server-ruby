@@ -27,6 +27,7 @@ module Router
     def respond!(request)
       route = find(request.http_method, request.path)
       raise RouteNotFound, "Route not found" if route.nil?
+      puts "Incoming request: #{request.http_method} #{request.path}"
       route.response(request)
     rescue => e
       if defined?(@fallback)

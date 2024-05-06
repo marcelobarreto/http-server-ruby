@@ -6,8 +6,8 @@ class Request
 
   attr_reader :headers
 
-  def method
-    headers[0].split[0]
+  def http_method
+    @http_method ||= headers[0].split[0]
   end
 
   def path

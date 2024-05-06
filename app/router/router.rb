@@ -30,7 +30,7 @@ module Router
       route.response(request)
     rescue => e
       if defined?(@fallback)
-        # @fallback.response(request)
+        @fallback.call(request)
       else
         raise FallbackRouteNotDefined, "Route not found"
       end

@@ -25,9 +25,13 @@ class HTTPServer
 
   def respond!
     status, _, response = @router.respond!(request)
+
     write!("HTTP/1.1 #{status}")
-    write!("Content-Type: text/plain")
-    write!("Content-Length: #{response.size}")
+
+    if response
+      write!("Content-Type: text/plain")
+      write!("Content-Length: #{response.size || 0}")
+    end
     write!("")
     write!(response)
 
@@ -44,13 +48,18 @@ class HTTPServer
 end
 
 http = HTTPServer.new(port: 4221)
+
 router = Router::Router.new
-router.add_route("GET", "/") { [HTTPStatus::OK, {}, Proc.new { |req| "Hello, World!" }] }
+router.add_route("GET", "/") do |req|
+  [HTTPStatus::OK, {}, "Hello, World!"]
+end
 router.add_route("GET", /\/echo\/(.*)/) do |req|
   msg = req.path.match(/\/echo\/(.*)/)[1]
   [HTTPStatus::OK, {}, msg]
 end
-router.set_fallback { [HTTPStatus::NotFound, {}, Proc.new { |req| "Not found" }] }
+router.set_fallback  do |req|
+  [HTTPStatus::NotFound, {}, "Not found"]
+end
 
 http.set_router(router)
 

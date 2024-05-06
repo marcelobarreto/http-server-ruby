@@ -50,11 +50,11 @@ class HTTPServer
       [HTTPStatus::OK, {}, msg]
     end
     @router.add_route("GET", "/user-agent") do |req|
-      msg = req.headers["User-Agent"]
+      msg = req.headers[2].split(": ")[1].strip
       [HTTPStatus::OK, {}, msg]
     end
     @router.set_fallback do
-      [HTTPStatus::NotFound, {}, "Not found anything at"]
+      [HTTPStatus::NotFound, {}, "Not Found"]
     end
   end
 end

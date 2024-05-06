@@ -1,24 +1,35 @@
 require "socket"
 
 require_relative "app"
+require_relative "http_status"
+require_relative "request"
 
 class HTTPServer
   def initialize(port:, host: "localhost")
+    puts "Listening to http://#{host}:#{port}"
+
     @host = host
     @port = port
     @server = TCPServer.new(host, port)
     @socket, @addr = @server.accept
+    @request = Request.new(@socket)
   end
 
-  def write(header:)
-    # socket.write(response.join("\r\n") + "\r\n")
-    socket.write("HTTP/1.1 200 OK\r\n\r\n")
+  def status(status)
+    socket.write("HTTP/1.1 #{status}")
   end
 
-  private
+  def write(s)
+    socket.write("\r\n")
+  end
 
-  attr_reader :host, :port, :server, :socket, :addr
+  # private
+
+  attr_reader :host, :port, :server, :socket, :addr, :request
 end
 
 http = HTTPServer.new(port: 4221)
-http.write(header: "HTTP/1.1 200 OK")
+puts http.request.headers
+http.status(http.request.path.eql?("/") ? HTTPStatus::OK : HTTPStatus::NotFound)
+http.write("\r\n")
+http.write("\r\n")

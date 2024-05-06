@@ -54,7 +54,7 @@ class HTTPServer
       [HTTPStatus::OK, {}, msg]
     end
     @router.set_fallback do |_req|
-      [HTTPStatus::NotFound, {}, "Not found"]
+      [HTTPStatus::NotFound, {}, "Not found at al"]
     end
   end
 end

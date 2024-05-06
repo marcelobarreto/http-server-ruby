@@ -28,10 +28,8 @@ class HTTPServer
 
     write!("HTTP/1.1 #{status}")
 
-    if response
-      write!("Content-Type: text/plain")
-      write!("Content-Length: #{response.size || 0}")
-    end
+    write!("Content-Type: text/plain")
+    write!("Content-Length: #{response.size || 0}")
     write!("")
     write!(response)
 
@@ -57,14 +55,13 @@ router.add_route("GET", /\/echo\/(.*)/) do |req|
   msg = req.path.match(/\/echo\/(.*)/)[1]
   [HTTPStatus::OK, {}, msg]
 end
+router.add_route("GET", "/user-agent") do |req|
+  msg = req.headers[2].split(": ")[1].strip
+  [HTTPStatus::OK, {}, msg]
+end
 router.set_fallback  do |req|
   [HTTPStatus::NotFound, {}, "Not found"]
 end
 
 http.set_router(router)
-
 http.respond!
-
-# http.status(HTTPStatus::OK)
-# http._socket.write("\r\n")
-# http._socket.write("\r\n")

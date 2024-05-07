@@ -67,7 +67,8 @@ class HTTPServer
       [HTTPStatus::OK, headers, msg]
     end
     @router.set_fallback do
-      [HTTPStatus::NotFound, {}, "Not Found"]
+      message = "Not Found"
+      [HTTPStatus::NotFound, { "Content-Type" => "text/plain", "Content-Length" => message.size}, message]
     end
   end
 end

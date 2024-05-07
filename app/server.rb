@@ -1,18 +1,21 @@
+require "pry"
 require "socket"
 require_relative "http_status"
 require_relative "request"
 require_relative "router/router"
 
 class HTTPServer
-  attr_reader :host, :port, :router
+  attr_reader :host, :port, :router, :static_directory
 
-  def initialize(port:, host: "localhost")
+  def initialize(port:, host: "localhost", static_path: "static")
     puts "Listening to http://#{host}:#{port}"
 
     @host = host
     @port = port
     @server = TCPServer.new(host, port)
     @router = Router::Router.new
+    @static_directory = File.join(File.dirname(__FILE__), static_path)
+
     configure_router
   end
 
@@ -45,9 +48,14 @@ class HTTPServer
     @router.add_route("GET", "/") do |_req|
       [HTTPStatus::OK, {}, ""]
     end
-    @router.add_route("GET", %r{/echo/(.*)}) do |req|
-      msg = req.path.match(%r{/echo/(.*)})[1]
+    @router.add_route("GET", /\/echo\/(.*)/) do |req|
+      msg = req.path.match(/\/echo\/(.*)/)[1]
       [HTTPStatus::OK, {}, msg]
+    end
+    @router.add_route("GET", /\/files\/(.*)/) do |req|
+      filepath = req.path.match(/\/files\/(.*)/)[1]
+      file = File.read(File.join(@static_directory, filepath))
+      [HTTPStatus::OK, {}, file]
     end
     @router.add_route("GET", "/user-agent") do |req|
       msg = req.headers[2].split(": ")[1].strip
@@ -59,5 +67,5 @@ class HTTPServer
   end
 end
 
-server = HTTPServer.new(port: 4221, host: "localhost")
+server = HTTPServer.new(port: 4221, host: "localhost", static_path: ARGV[1] || "static")
 server.start

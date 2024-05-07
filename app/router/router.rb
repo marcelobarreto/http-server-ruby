@@ -40,7 +40,7 @@ module Router
     def add_route(method, path, &block)
       method = method.to_s.upcase
       raise RouteAlreadyDefined, "Route already defined" if route_defined?(method, path)
-      routes[method.to_s][path] = Route.new(method, path, &block)
+      routes[method][path] = Route.new(method, path, &block)
     end
 
     def route_defined?(method, path)

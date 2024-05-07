@@ -6,6 +6,13 @@ class HTTPStatus
     end
   end
 
+  class Created
+    STATUS = 201
+    def self.to_s
+      "201 Created"
+    end
+  end
+
   class NotFound
     STATUS = 404
     def self.to_s

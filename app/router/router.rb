@@ -30,6 +30,7 @@ module Router
       puts "Incoming request: #{request.http_method} #{request.path}"
       route.response(request)
     rescue => e
+      puts e.message
       if defined?(@fallback)
         @fallback.call(request)
       else

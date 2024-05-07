@@ -30,7 +30,7 @@ class HTTPServer
   private
 
   def handle_session(session, &block)
-    request = Request.new(session)
+    request = Request.new(session.readpartial(2048))
     status, headers, response = @router.respond!(request)
 
     session.print("HTTP/1.1 #{status}\r\n")
@@ -66,8 +66,16 @@ class HTTPServer
         [HTTPStatus::NotFound, { "Content-Type" => "text/plain", "Content-Length" => message.size}, message]
       end
     end
+    @router.add_route("POST", /\/files\/(.*)/) do |req|
+      filepath = File.join(static_directory, req.path.match(/\/files\/(.*)/)[1])
+      size = File.open(filepath, "w") do |file|
+        file.write(req.body)
+      end
+      headers = {"Content-Type" => "application/octet-stream", "Content-Length" => size}
+      [HTTPStatus::Created, headers, file]
+    end
     @router.add_route("GET", "/user-agent") do |req|
-      msg = req.headers[2].split(": ")[1].strip
+      msg = req.headers["User-Agent"]
       headers = {"Content-Type" => "text/plain", "Content-Length" => msg.size}
       [HTTPStatus::OK, headers, msg]
     end

@@ -1,26 +1,31 @@
 class Request
-  def initialize(socket)
-    @socket = socket
-    @headers = set_headers(@socket.dup)
+  attr_reader :method, :path, :headers, :body, :query
+  alias_method :http_method, :method
+
+  def initialize(request)
+    lines = request.lines
+    index = lines.index("\r\n")
+
+    @method, @path, _ = lines.first.split
+    @path, @query = @path.split("?")
+    @headers = parse_headers(lines[1...index])
+    @body = lines[(index + 1)..-1].join
+
+    puts "<- #{@method} #{@path}"
   end
 
-  attr_reader :headers
+  def parse_headers(lines)
+    headers = {}
 
-  def http_method
-    @http_method ||= headers[0].split[0]
-  end
-
-  def path
-    headers[0].split[1]
-  end
-
-  private
-
-  def set_headers(socket)
-    headers = []
-    while (line = socket.gets) && line.chomp != ''
-      headers << line
+    lines.each do |line|
+      name, value = line.split(": ")
+      headers[name] = value.chomp
     end
+
     headers
+  end
+
+  def content_length
+    headers["Content-Length"].to_i
   end
 end

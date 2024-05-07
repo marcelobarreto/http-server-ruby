@@ -14,7 +14,7 @@ class HTTPServer
     @port = port
     @server = TCPServer.new(host, port)
     @router = Router::Router.new
-    @static_directory = File.join(File.dirname(__FILE__), static_path)
+    @static_directory = File.join(static_path)
 
     configure_router
   end
@@ -54,7 +54,7 @@ class HTTPServer
     end
     @router.add_route("GET", /\/files\/(.*)/) do |req|
       filepath = req.path.match(/\/files\/(.*)/)[1]
-      file = File.read(File.join(@static_directory, filepath))
+      file = File.read(File.join(static_directory, filepath))
       [HTTPStatus::OK, {}, file]
     end
     @router.add_route("GET", "/user-agent") do |req|

@@ -29,13 +29,14 @@ class HTTPServer
 
   private
 
-  def handle_session(session)
+  def handle_session(session, &block)
     request = Request.new(session)
-    status, _, response = @router.respond!(request)
+    status, headers, response = @router.respond!(request)
 
     session.print("HTTP/1.1 #{status}\r\n")
-    session.print("Content-Type: text/plain\r\n")
-    session.print("Content-Length: #{response.size || 0}\r\n")
+    headers.each do |key, value|
+      session.print("#{key}: #{value}\r\n")
+    end
     session.print("\r\n")
     session.print(response)
   rescue IOError, Errno::EPIPE => e
@@ -50,16 +51,20 @@ class HTTPServer
     end
     @router.add_route("GET", /\/echo\/(.*)/) do |req|
       msg = req.path.match(/\/echo\/(.*)/)[1]
-      [HTTPStatus::OK, {}, msg]
+      headers = {"Content-Type" => "text/plain", "Content-Length" => msg.size}
+      [HTTPStatus::OK, headers, msg]
     end
     @router.add_route("GET", /\/files\/(.*)/) do |req|
       filepath = req.path.match(/\/files\/(.*)/)[1]
       file = File.read(File.join(static_directory, filepath))
-      [HTTPStatus::OK, {}, file]
+      headers = {"Content-Type" => "application/octet-stream", "Content-Length" => file.size}
+
+      [HTTPStatus::OK, headers, file]
     end
     @router.add_route("GET", "/user-agent") do |req|
       msg = req.headers[2].split(": ")[1].strip
-      [HTTPStatus::OK, {}, msg]
+      headers = {"Content-Type" => "text/plain", "Content-Length" => msg.size}
+      [HTTPStatus::OK, headers, msg]
     end
     @router.set_fallback do
       [HTTPStatus::NotFound, {}, "Not Found"]

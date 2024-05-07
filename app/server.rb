@@ -72,7 +72,7 @@ class HTTPServer
         file.write(req.body)
       end
       headers = {"Content-Type" => "application/octet-stream", "Content-Length" => size}
-      [HTTPStatus::Created, headers, file]
+      [HTTPStatus::Created, headers, size]
     end
     @router.add_route("GET", "/user-agent") do |req|
       msg = req.headers["User-Agent"]

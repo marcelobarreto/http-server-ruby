@@ -55,11 +55,15 @@ class HTTPServer
       [HTTPStatus::OK, headers, msg]
     end
     @router.add_route("GET", /\/files\/(.*)/) do |req|
-      filepath = req.path.match(/\/files\/(.*)/)[1]
-      file = File.read(File.join(static_directory, filepath))
-      headers = {"Content-Type" => "application/octet-stream", "Content-Length" => file.size}
-
-      [HTTPStatus::OK, headers, file]
+      filepath = File.join(static_directory, req.path.match(/\/files\/(.*)/)[1])
+      if File.exists?(filepath)
+        file = File.read(filepath)
+        headers = {"Content-Type" => "application/octet-stream", "Content-Length" => file.size}
+        [HTTPStatus::OK, headers, file]
+      else
+        message = "Not Found"
+        [HTTPStatus::NotFound, { "Content-Type" => "text/plain", "Content-Length" => message.size}, message]
+      end
     end
     @router.add_route("GET", "/user-agent") do |req|
       msg = req.headers[2].split(": ")[1].strip

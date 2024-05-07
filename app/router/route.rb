@@ -9,7 +9,7 @@ module Router
     end
 
     def response(request)
-      @response ||= @block.call(request)
+      @block.call(request)
     end
   end
 end

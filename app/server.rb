@@ -58,6 +58,7 @@ class HTTPServer
       filepath = File.join(static_directory, req.path.match(/\/files\/(.*)/)[1])
       if File.exist?(filepath)
         file = File.read(filepath)
+        puts "Serving file: #{filepath}"
         headers = {"Content-Type" => "application/octet-stream", "Content-Length" => file.size}
         [HTTPStatus::OK, headers, file]
       else
